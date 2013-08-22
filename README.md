@@ -2,7 +2,7 @@
 
 This is a simple crash report submission service. It sends emails with crash
 reports as attachments through Gmail. In order to run it, configure the
-`WebServiceFilter` to have a correct username and password, then start it with:
+`application.properties` to have the desired information, then start it with:
 
     mvn tomcat7:run-war
 
