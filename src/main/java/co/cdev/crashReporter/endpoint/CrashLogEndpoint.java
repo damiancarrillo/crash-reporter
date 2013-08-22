@@ -37,69 +37,108 @@ import co.cdev.agave.configuration.RoutingContext;
 import co.cdev.agave.web.HTTPResponse;
 import co.cdev.agave.web.StatusCode;
 import co.cdev.crashReporter.service.MailService;
+import co.cdev.crashReporter.repository.CrashLogRepository;
 import co.cdev.gson.JSONResponse;
+import co.cdev.crashReporter.model.CrashLog;
+import co.cdev.crashReporter.model.CrashLogImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Transaction;
 import javax.mail.MessagingException;
 import java.io.File;
 import java.util.HashMap;
 
-public class CrashReportEndpoint {
+public class CrashLogEndpoint {
 
-    private final Logger logger = LoggerFactory.getLogger(CrashReportEndpoint.class.getSimpleName());
-    private static final int FILE_MAX_SIZE = 200000;
+    private final Logger logger = LoggerFactory.getLogger(CrashLogEndpoint.class.getSimpleName());
+    private static final int FILE_MAX_SIZE = 200000; // bytes
 
+    private final PersistenceManagerFactory pmf;
     private final String sender;
     private final Iterable<String> recipients;
     private final MailService mailService;
+    private final CrashLogRepository crashLogRepository;
 
-    public CrashReportEndpoint(String           sender,
-                               Iterable<String> recipients,
-                               MailService      mailService) {
+    public CrashLogEndpoint(PersistenceManagerFactory pmf,
+                            String                    sender,
+                            Iterable<String>          recipients,
+                            MailService               mailService,
+                            CrashLogRepository        crashLogRepository) {
+        this.pmf = pmf;
         this.sender = sender;
         this.recipients = recipients;
         this.mailService = mailService;
+        this.crashLogRepository = crashLogRepository;
     }
 
     /**
-     * Accepts a submitted crash report.
+     * Accepts a submitted crash log.
      *
      * Usage:
-     *     curl -F "app=MyApp" \
-     *          -F "version=1.0.0" \
+     *     curl -F "deviceId=someDeviceId" \
+     *          -F "appName=MyApp" \
+     *          -F "appVersion=1.0.0" \
      *          -F "file=@crash.log;type=application/octet-stream" \
      *          http://localhost:9999/crash-report
      *
      * @param routingContext the context that this handler method executes under
-     * @param crashReportPart The crash report file.
+     * @param crashLogPart The crash report file.
      * @throws Exception if anything goes wrong
      * @return a destination object that wraps the index.jsp page
      */
     @Route(method = HTTPMethod.POST, uri = "/crash-report")
-    public HTTPResponse crashReport(RoutingContext routingContext,
-                                    @Param("app")     String     app,
-                                    @Param("version") String     version,
-                                    @Param("file")    Part<File> crashReportPart)
+    public HTTPResponse submitCrashLog(RoutingContext routingContext,
+                                       @Param("deviceId")   String     deviceId,
+                                       @Param("appName")    String     appName,
+                                       @Param("appVersion") String     appVersion,
+                                       @Param("file")       Part<File> crashLogPart)
             throws Exception {
-        File crashReport = crashReportPart.getContents();
+        File crashLogFile = crashLogPart.getContents();
 
-        logger.info("POST /crash-report ({} bytes, {})", crashReport.length(), crashReport.getPath());
+        logger.info("POST /crash-report ({} bytes, {})", crashLogFile.length(), crashLogFile.getPath());
 
-        if (crashReport.length() > FILE_MAX_SIZE) {
+        if (crashLogFile.length() > FILE_MAX_SIZE) {
             logger.warn("Ignoring crash report. File size exceeded {} bytes", FILE_MAX_SIZE);
             return new JSONResponse(StatusCode._400_BadRequest, new HashMap<String, String>() {{
                 put("message", "Crash report is too large.");
             }});
         }
 
+        CrashLog crashLog = new CrashLogImpl();
+        crashLog.setDeviceId(deviceId);
+        crashLog.setAppName(appName);
+        crashLog.setAppVersion(appVersion);
+
+        // TODO move file into application-owned directory, then set it on the crashLog
+
+        PersistenceManager pm = pmf.getPersistenceManager();
+        Transaction tx = pm.currentTransaction();
+
+        try {
+            tx.begin();
+            crashLog = crashLogRepository.store(pm, crashLog);
+            tx.commit();
+        } catch (JDOObjectNotFoundException ex) {
+            return new HTTPResponse(StatusCode._500_InternalServerError, "Unable to store crash log");
+        } finally {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+
+            pm.close();
+        }
+
         try {
             mailService.sendMessage(
                 sender,
                 recipients,
-                String.format("Crash in %s %s", app, version),
-                String.format("A crash has occurred in in %s version %s. The crash log is attached.\n\n", app, version),
-                crashReport
+                String.format("Crash in %s %s", appName, appVersion),
+                String.format("A crash has occurred in in %s version %s. The crash log is attached.\n\n", appName, appVersion),
+                crashLogFile
             );
         } catch (MessagingException ex) {
             logger.error("Unable to send crash report email", ex);

@@ -31,7 +31,9 @@ package co.cdev.crashReporter;
 
 import co.cdev.agave.configuration.HandlerDescriptor;
 import co.cdev.agave.web.*;
-import co.cdev.crashReporter.endpoint.CrashReportEndpoint;
+import co.cdev.crashReporter.endpoint.CrashLogEndpoint;
+import co.cdev.crashReporter.repository.CrashLogRepository;
+import co.cdev.crashReporter.repository.CrashLogRepositoryImpl;
 import co.cdev.crashReporter.service.GMailServiceImpl;
 import co.cdev.crashReporter.service.MailService;
 import co.cdev.gson.ISO8601DateTypeAdapter;
@@ -88,10 +90,20 @@ public class WebServiceFilter extends AgaveFilter {
 
         config.getServletContext().setAttribute(APPLICATION_PROPERTIES, applicationProperties);
 
+        Gson gson = configureGson(applicationProperties);
+        PersistenceManagerFactory pmf = configurePMF(config);
+
+        DatastoreInitializer datastoreInitializer = new DatastoreInitializer();
+        datastoreInitializer.initializeDatastore(pmf);
+
+        addResultProcessor(new JSONResponseProcessor(gson));
+
         MailService gmailService = new GMailServiceImpl(
-            applicationProperties.getProperty("crash-reporter.gmail.username"),
-            applicationProperties.getProperty("crash-reporter.gmail.password")
+                applicationProperties.getProperty("crash-reporter.gmail.username"),
+                applicationProperties.getProperty("crash-reporter.gmail.password")
         );
+
+        CrashLogRepository crashLogRepository = new CrashLogRepositoryImpl();
 
         endpoints.put(WelcomeEndpoint.class, new WelcomeEndpoint());
 
@@ -106,15 +118,7 @@ public class WebServiceFilter extends AgaveFilter {
             }
         }
 
-        endpoints.put(CrashReportEndpoint.class, new CrashReportEndpoint(sender, recipients, gmailService));
-
-        Gson gson = configureGson(applicationProperties);
-        PersistenceManagerFactory pmf = configurePMF(config);
-
-        DatastoreInitializer datastoreInitializer = new DatastoreInitializer();
-        datastoreInitializer.initializeDatastore(pmf);
-
-        addResultProcessor(new JSONResponseProcessor(gson));
+        endpoints.put(CrashLogEndpoint.class, new CrashLogEndpoint(pmf, sender, recipients, gmailService, crashLogRepository));
     }
 
     private Gson configureGson(Properties applicationProperties) {
