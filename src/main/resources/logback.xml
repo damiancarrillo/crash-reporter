@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+  
+  <appender name="dev" class="ch.qos.logback.core.ConsoleAppender"> 
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+  
+  <appender name="test" class="ch.qos.logback.core.ConsoleAppender">
+    <!--
+    
+    TODO: Configure the following path to point to your test log file
+    
+    <file>.../crash-reporter.log</file>
+    -->
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+  
+  <appender name="prod" class="ch.qos.logback.core.ConsoleAppender">
+    <!--
+    
+    TODO: Configure the following path to point to your production log file
+    
+    <file>.../crash-reporter.log</file>
+    -->
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+  
+  <logger name="DataNucleus.Persistence" level="info" />
+  
+  <root level="info">
+    <appender-ref ref="${logbackRootAppender}" />
+  </root>
+  
+</configuration>
