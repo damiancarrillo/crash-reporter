@@ -5,31 +5,36 @@
                          http://java.sun.com/xml/ns/jdo/jdo_3_0.xsd">
     <package name="co.cdev.crashReporter.model">
         <class name="EntityImpl" identity-type="application">
-            <inheritance strategy="complete-table" />
+            <inheritance strategy="complete-table"/>
             <field name="objectID" primary-key="true" value-strategy="increment">
-              <column name="object_id" />
+              <column name="object_id"/>
             </field>
             <field name="version">
-                <column name="version" />
+                <column name="version"/>
             </field>
             <field name="createdDate">
-                <column name="created_date" />
+                <column name="created_date"/>
             </field>
             <field name="modifiedDate">
-                <column name="modified_date" />
+                <column name="modified_date"/>
             </field>
             <version strategy="version-number">
                 <extension vendor-name="datanucleus" key="field-name" value="version"/>
             </version>
         </class>
-        <class name="NamedEntityImpl">
-            <field name="name">
-                <column name="name" />
+        <class name="CrashLogImpl" identity-type="application">
+            <inheritance strategy="complete-table"/>
+            <field name="deviceId">
+                <column name="device_id"/>
             </field>
-        </class>
-        <class name="OrderedEntityImpl">
-            <field name="ordinal">
-                <column name="ordinal" />
+            <field name="appName">
+                <column name="app_name"/>
+            </field>
+            <field name="appVersion">
+                <column name="app_version"/>
+            </field>
+            <field name="crashLogFileName">
+                <column name="crash_log"/>
             </field>
         </class>
     </package>

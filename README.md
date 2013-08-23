@@ -12,7 +12,7 @@ named `crash.log`:
     curl -F "app=MyApp" \
          -F "version=1.0.0" \
          -F "file=@crash.log;type=application/octet-stream" \
-         http://localhost:9999/crash-report
+         http://localhost:9999/api/1.0/crashlog
 
 ## License
 
