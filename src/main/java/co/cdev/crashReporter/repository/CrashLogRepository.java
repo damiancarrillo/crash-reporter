@@ -29,15 +29,15 @@
 
 package co.cdev.crashReporter.repository;
 
-import co.cdev.crashReporter.model.Entity;
 import co.cdev.crashReporter.model.CrashLog;
-
-import javax.jdo.JDOException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
-
 import java.util.List;
 
 public interface CrashLogRepository extends Repository<CrashLog> {
+
+    List<CrashLog> fetchCrashLogsWithDeviceId(PersistenceManager pm,
+                                              String deviceId,
+                                              long index,
+                                              long count)
+            throws RepositoryException;
 
 }

@@ -9,10 +9,11 @@ reports as attachments through Gmail. In order to run it, configure the
 To test it, issue the following command in a directory that has a crash log
 named `crash.log`:
 
-    curl -F "app=MyApp" \
-         -F "version=1.0.0" \
+    curl -F "appName=MyApp" \
+         -F "appVersion=1.0.0" \
+         -F "deviceId=someDeviceId" \
          -F "file=@crash.log;type=application/octet-stream" \
-         http://localhost:9999/api/1.0/crashlog
+         http://localhost:9999/crash-reporter/api/crash-logs
 
 ## License
 

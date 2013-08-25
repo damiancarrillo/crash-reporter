@@ -69,19 +69,19 @@ public abstract class AbstractRepository<E extends Entity> implements Repository
 
     @Override
     public List<E> fetch(PersistenceManager pm, long index, long count) throws RepositoryException {
-        List<E> activities = null;
+        List<E> entities = null;
 
         try {
             Query query = pm.newQuery(getEntityClass());
             query.setOrdering("createdDate descending");
             query.setRange(index, index + count);
 
-            activities = (List<E>) query.execute();
+            entities = (List<E>) query.execute();
         } catch (JDOException ex) {
             throw new RepositoryException(ex);
         }
 
-        return activities;
+        return entities;
     }
 
 }

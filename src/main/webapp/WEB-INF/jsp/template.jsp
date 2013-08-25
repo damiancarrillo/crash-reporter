@@ -5,20 +5,23 @@
   <head>
     <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
     <title>
-      <template:useFragment name="title" />
-      <fmt:message key="applicationName" />
+      <template:useFragment name="title"/>
+      - <fmt:message key="applicationName"/>
     </title>
-    <style type="text/css">
-
-    </style>
+    <link rel="stylesheet" href="${contextPath}/style/tuktuk.css"/>
+    <link rel="stylesheet" href="${contextPath}/style/tuktuk.icons.css"/>
+    <link rel="stylesheet" href="${contextPath}/style/tuktuk.theme.css"/>
+    <link rel="stylesheet" href="${contextPath}/style/main.css"/>
   </head>
   <body>
-    <div id="content">
+    <div id="header" class="bck theme">
+      <h1 class="text bold"><template:useFragment name="title"/></h1>
+    </div>
+    <div id="content" class="bck light">
       <template:useFragment name="content" />
     </div>
-    <div id="sidebar">
-      <template:useFragment name="sidebarHeader" />
-      SIDEBAR CONTENT
+    <div id="footer" class="bck color">
+      <fmt:message key="copyright"/>
     </div>
   </body>
 </html>

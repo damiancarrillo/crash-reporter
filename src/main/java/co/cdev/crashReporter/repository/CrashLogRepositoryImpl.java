@@ -29,12 +29,10 @@
 
 package co.cdev.crashReporter.repository;
 
-import co.cdev.crashReporter.model.Entity;
 import co.cdev.crashReporter.model.CrashLog;
-import co.cdev.crashReporter.model.CrashLogImpl;
 
-import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
+import javax.jdo.JDOException;
 import javax.jdo.Query;
 
 import java.util.List;
@@ -47,12 +45,36 @@ public class CrashLogRepositoryImpl extends AbstractRepository<CrashLog> impleme
 
     @Override
     public CrashLog createEntity() {
-        return new CrashLogImpl();
+        return new CrashLog();
     }
 
     @Override
     public CrashLog store(PersistenceManager pm, CrashLog crashLog) throws RepositoryException {
         return pm.makePersistent(crashLog);
+    }
+
+    @Override
+    public List<CrashLog> fetchCrashLogsWithDeviceId(PersistenceManager pm,
+                                                     String deviceId,
+                                                     long index,
+                                                     long count)
+            throws RepositoryException {
+        List<CrashLog> crashLogs = null;
+
+        try {
+            Query query = pm.newQuery(getEntityClass());
+            query.setOrdering("createdDate descending");
+            query.setRange(index, index + count);
+            query.setFilter("deviceId == someDeviceId");
+            query.declareImports("import java.util.String");
+            query.declareParameters("String someDeviceId");
+
+            crashLogs = (List<CrashLog>) query.execute(deviceId);
+        } catch (JDOException ex) {
+            throw new RepositoryException(ex);
+        }
+
+        return crashLogs;
     }
 
 }

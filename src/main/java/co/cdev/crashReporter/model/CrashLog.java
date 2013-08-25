@@ -29,22 +29,43 @@
 
 package co.cdev.crashReporter.model;
 
-public interface CrashLog extends Entity {
+public class CrashLog extends EntityImpl {
 
-    public String getDeviceId();
+    String appName;
+    String appVersion;
+    String deviceId;
+    String fileName;
 
-    public void setDeviceId(String deviceId);
+    public String getAppName() {
+        return appName;
+    }
 
-    public String getAppName();
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
 
-    public void setAppName(String appName);
+    public String getAppVersion() {
+        return appVersion;
+    }
 
-    public String getAppVersion();
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
+    }
 
-    public void setAppVersion(String version);
+    public String getDeviceId() {
+        return deviceId;
+    }
 
-    public String getCrashLogFileName();
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
 
-    public void setCrashLogFileName(String crashLogFileName);
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
 }

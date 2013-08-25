@@ -6,6 +6,10 @@
          metadata-complete="false"
          version="2.5">
   <display-name>crash-reporter</display-name>
+  <context-param>
+    <param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
+    <param-value>messages</param-value>
+  </context-param>
   <filter>
     <filter-name>WebServiceFilter</filter-name>
     <filter-class>co.cdev.crashReporter.WebServiceFilter</filter-class>

@@ -1,0 +1,7 @@
+body {
+  background:#415b75;
+}
+
+#header, #content, #footer {
+  padding: 40px;
+}

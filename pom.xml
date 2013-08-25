@@ -73,6 +73,11 @@
       <version>${datanucleus.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.datanucleus</groupId>
+      <artifactId>datanucleus-enhancer</artifactId>
+      <version>${datanucleus.version}</version>
+    </dependency>
+    <dependency>
       <groupId>postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>9.1-901.jdbc4</version>
@@ -202,6 +207,12 @@
             <version>${datanucleus.version}</version>
             <scope>runtime</scope>
           </dependency>
+          <dependency>
+            <groupId>org.datanucleus</groupId>
+            <artifactId>datanucleus-enhancer</artifactId>
+            <version>${datanucleus.version}</version>
+            <scope>runtime</scope>
+          </dependency>
         </dependencies>
         <executions>
           <execution>
@@ -234,7 +245,7 @@
         <artifactId>tomcat7-maven-plugin</artifactId>
         <version>2.0-beta-1</version>
         <configuration>
-          <path>/</path>
+          <path>/crash-reporter</path>
           <addContextWarDependencies>true</addContextWarDependencies>
           <contextFile>${project.build.directory}/${project.build.finalName}/META-INF/context.xml</contextFile>
           <port>9999</port>

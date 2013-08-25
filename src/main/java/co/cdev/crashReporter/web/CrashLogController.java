@@ -32,7 +32,6 @@ package co.cdev.crashReporter.web;
 import co.cdev.agave.Param;
 import co.cdev.agave.Route;
 import co.cdev.agave.configuration.RoutingContext;
-import co.cdev.agave.web.Destination;
 import co.cdev.agave.web.Destinations;
 import co.cdev.agave.web.HTTPResponse;
 import co.cdev.agave.web.StatusCode;
@@ -67,29 +66,20 @@ public class CrashLogController {
         this.crashLogRepository = crashLogRepository;
     }
 
-    /**
-     * Serves the same purpose as that of a 'welcome-file' entry in the web.xml file.
-     * Note, that binding a handler to the root of the application like we are doing here will
-     * always override the 'welcome-file' entry.
-     *
-     * @param routingContext the context that this handler method executes under
-     * @throws Exception if anything goes wrong
-     * @return a destination object that wraps the index.jsp page
-     */
     @Route("/")
     public Object welcome(RoutingContext routingContext) throws Exception {
-        return Destinations.redirect("/crashLog", 0, maxListCount);
+        return Destinations.redirect("/crash-logs", 0, maxListCount);
     }
 
-    @Route("/crashLog")
+    @Route("/crash-logs")
     public Object viewCrashLogs(RoutingContext routingContext) throws Exception {
         return viewCrashLogs(routingContext, 0, maxListCount);
     }
 
-    @Route("/crashLog")
+    @Route("/crash-logs")
     public Object viewCrashLogs(RoutingContext routingContext,
-                                     @Param("index") int index,
-                                     @Param("count") int count)
+                                @Param("index") int index,
+                                @Param("count") int count)
             throws Exception {
         List<CrashLog> crashLogs = null;
 
@@ -99,6 +89,43 @@ public class CrashLogController {
         try {
             tx.begin();
             crashLogs = crashLogRepository.fetch(pm, index, count);
+            tx.commit();
+
+            routingContext.getRequest().setAttribute("crashLogs", crashLogs);
+        } catch (JDOObjectNotFoundException ex) {
+            LOGGER.error("Unable to fetch crash log list", ex);
+            return new HTTPResponse(StatusCode._500_InternalServerError, "Unable to store crash log");
+        } finally {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            pm.close();
+        }
+
+        return Destinations.forward("/WEB-INF/jsp/crashLogList.jsp");
+    }
+
+    @Route("/crash-logs/device-id/${deviceId}")
+    public Object viewCrashLogsWithDeviceId(RoutingContext routingContext,
+                                            @Param("deviceId") String deviceId)
+            throws Exception {
+        return viewCrashLogsWithDeviceId(routingContext, 0, maxListCount);
+    }
+
+    @Route("/crash-logs/device-id/${deviceId}")
+    public Object viewCrashLogsWithDeviceId(RoutingContext routingContext,
+                                            @Param("deviceId") String deviceId,
+                                            @Param("index") int index,
+                                            @Param("count") int count)
+            throws Exception {
+        List<CrashLog> crashLogs = null;
+
+        PersistenceManager pm = pmf.getPersistenceManager();
+        Transaction tx = pm.currentTransaction();
+
+        try {
+            tx.begin();
+            crashLogs = crashLogRepository.fetchCrashLogsWithDeviceId(pm, index, count);
             tx.commit();
 
             routingContext.getRequest().setAttribute("crashLogs", crashLogs);

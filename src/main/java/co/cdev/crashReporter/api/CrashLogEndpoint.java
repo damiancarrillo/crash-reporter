@@ -40,7 +40,6 @@ import co.cdev.crashReporter.service.MailService;
 import co.cdev.crashReporter.repository.CrashLogRepository;
 import co.cdev.gson.JSONResponse;
 import co.cdev.crashReporter.model.CrashLog;
-import co.cdev.crashReporter.model.CrashLogImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +60,7 @@ public class CrashLogEndpoint {
     private final PersistenceManagerFactory pmf;
     private final String sender;
     private final Iterable<String> recipients;
+    private final int maxFileSize;
     private final File crashLogDirectory;
     private final MailService mailService;
     private final CrashLogRepository crashLogRepository;
@@ -68,18 +68,20 @@ public class CrashLogEndpoint {
     public CrashLogEndpoint(PersistenceManagerFactory pmf,
                             String                    sender,
                             Iterable<String>          recipients,
+                            int                       maxFileSize,
                             File                      crashLogDirectory,
                             MailService               mailService,
                             CrashLogRepository        crashLogRepository) {
         this.pmf = pmf;
         this.sender = sender;
         this.recipients = recipients;
+        this.maxFileSize = maxFileSize;
         this.crashLogDirectory = crashLogDirectory;
         this.mailService = mailService;
         this.crashLogRepository = crashLogRepository;
     }
 
-    @Route(method = HTTPMethod.POST, uri = "/api/crashLog")
+    @Route(method = HTTPMethod.POST, uri = "/api/crash-logs")
     public HTTPResponse submitCrashLog(RoutingContext routingContext,
                                        @Param("deviceId")   String     deviceId,
                                        @Param("appName")    String     appName,
@@ -93,11 +95,11 @@ public class CrashLogEndpoint {
      * Accepts a submitted crash log.
      *
      * Usage:
-     *     curl -F "deviceId=someDeviceId" \
-     *          -F "appName=MyApp" \
+     *     curl -F "appName=MyApp" \
      *          -F "appVersion=1.0.0" \
+     *          -F "deviceId=someDeviceId" \
      *          -F "file=@crash.log;type=application/octet-stream" \
-     *          http://localhost:9999/api/crashLog
+     *          http://localhost:9999/crash-reporter/api/crash-logs
      *
      * @param routingContext the context that this handler method executes under
      * @param deviceId the ID of the device that is submitting the crash log (for aggregation purposes)
@@ -108,7 +110,7 @@ public class CrashLogEndpoint {
      * @return a destination object that wraps the index.jsp page
      * @since 1.0
      */
-    @Route(method = HTTPMethod.POST, uri = "/api/1.0/crashLog")
+    @Route(method = HTTPMethod.POST, uri = "/api/1.0/crash-logs")
     public HTTPResponse submitCrashLog10(RoutingContext routingContext,
                                          @Param("deviceId")   String     deviceId,
                                          @Param("appName")    String     appName,
@@ -117,7 +119,7 @@ public class CrashLogEndpoint {
             throws Exception {
         File crashLogFile = crashLogPart.getContents();
 
-        LOGGER.info("POST /api/1.0/crashLog ({} bytes, {})", crashLogFile.length(), crashLogFile.getPath());
+        LOGGER.info("POST /api/1.0/crash-logs ({} bytes, {})", crashLogFile.length(), crashLogFile.getPath());
 
         if (crashLogFile.length() > FILE_MAX_SIZE) {
             LOGGER.warn("Ignoring crash report. File size exceeded {} bytes", FILE_MAX_SIZE);
@@ -129,10 +131,11 @@ public class CrashLogEndpoint {
         File storedCrashLogFile = new File(crashLogDirectory, String.format("%s.crash", UUID.randomUUID().toString()));
 
         if (crashLogFile.renameTo(storedCrashLogFile)) {
-            CrashLog crashLog = new CrashLogImpl();
+            CrashLog crashLog = new CrashLog();
             crashLog.setDeviceId(deviceId);
             crashLog.setAppName(appName);
-            crashLog.setCrashLogFileName(storedCrashLogFile.getName());
+            crashLog.setAppVersion(appVersion);
+            crashLog.setFileName(storedCrashLogFile.getName());
 
             LOGGER.info("Moved crash log to: {}", storedCrashLogFile.getAbsolutePath());
 
@@ -161,7 +164,7 @@ public class CrashLogEndpoint {
                     recipients,
                     String.format("Crash in %s %s", appName, appVersion),
                     String.format("A crash has occurred in in %s version %s. The crash log is attached.\n\n", appName, appVersion),
-                    crashLogFile
+                    storedCrashLogFile
                 );
             } catch (MessagingException ex) {
                 LOGGER.error("Unable to send crash report email", ex);
