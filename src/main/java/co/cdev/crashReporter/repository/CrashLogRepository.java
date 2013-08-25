@@ -30,7 +30,10 @@
 package co.cdev.crashReporter.repository;
 
 import co.cdev.crashReporter.model.CrashLog;
+
 import java.util.List;
+
+import javax.jdo.PersistenceManager;
 
 public interface CrashLogRepository extends Repository<CrashLog> {
 

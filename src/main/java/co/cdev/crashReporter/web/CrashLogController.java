@@ -45,6 +45,9 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
 import java.io.File;
+import java.io.FileInputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.List;
 
 public class CrashLogController {
@@ -109,14 +112,14 @@ public class CrashLogController {
     public Object viewCrashLogsWithDeviceId(RoutingContext routingContext,
                                             @Param("deviceId") String deviceId)
             throws Exception {
-        return viewCrashLogsWithDeviceId(routingContext, 0, maxListCount);
+        return viewCrashLogsWithDeviceId(routingContext, deviceId, 0, maxListCount);
     }
 
     @Route("/crash-logs/device-id/${deviceId}")
     public Object viewCrashLogsWithDeviceId(RoutingContext routingContext,
                                             @Param("deviceId") String deviceId,
-                                            @Param("index") int index,
-                                            @Param("count") int count)
+                                            @Param("index") long index,
+                                            @Param("count") long count)
             throws Exception {
         List<CrashLog> crashLogs = null;
 
@@ -125,10 +128,11 @@ public class CrashLogController {
 
         try {
             tx.begin();
-            crashLogs = crashLogRepository.fetchCrashLogsWithDeviceId(pm, index, count);
+            crashLogs = crashLogRepository.fetchCrashLogsWithDeviceId(pm, deviceId, index, count);
             tx.commit();
 
             routingContext.getRequest().setAttribute("crashLogs", crashLogs);
+            routingContext.getRequest().setAttribute("deviceId", deviceId);
         } catch (JDOObjectNotFoundException ex) {
             LOGGER.error("Unable to fetch crash log list", ex);
             return new HTTPResponse(StatusCode._500_InternalServerError, "Unable to store crash log");
@@ -140,6 +144,34 @@ public class CrashLogController {
         }
 
         return Destinations.forward("/WEB-INF/jsp/crashLogList.jsp");
+    }
+
+    @Route("/crash-log/${fileName}")
+    public void downloadCrashLog(RoutingContext routingContext,
+                                 @Param("fileName") String fileName)
+            throws Exception {
+        File crashLog = new File(crashLogDirectory, fileName);
+
+        routingContext.getResponse().setContentType("application/octet-stream");
+        routingContext.getResponse().setContentLength((int) crashLog.length());
+
+        FileInputStream input = new FileInputStream(crashLog);
+        FileChannel channel = input.getChannel();
+
+        byte[] buffer = new byte[256 * 1024];
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+
+        try {
+            for (int length = 0; (length = channel.read(byteBuffer)) != -1;) {
+                routingContext.getResponse().getOutputStream().write(buffer, 0, length);
+                byteBuffer.clear();
+            }
+        } finally {
+            input.close();
+        }
+
+        routingContext.getResponse().setStatus(StatusCode._200_Ok.getNumericCode());
+        routingContext.getResponse().flushBuffer();
     }
 
 }

@@ -66,7 +66,7 @@ public class CrashLogRepositoryImpl extends AbstractRepository<CrashLog> impleme
             query.setOrdering("createdDate descending");
             query.setRange(index, index + count);
             query.setFilter("deviceId == someDeviceId");
-            query.declareImports("import java.util.String");
+            query.declareImports("import java.lang.String");
             query.declareParameters("String someDeviceId");
 
             crashLogs = (List<CrashLog>) query.execute(deviceId);

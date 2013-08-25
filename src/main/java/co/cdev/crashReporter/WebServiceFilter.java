@@ -108,6 +108,7 @@ public class WebServiceFilter extends AgaveFilter {
 
         String sender = applicationProperties.getProperty("crash-reporter.crashLog.sender");
         String packedRecipients = applicationProperties.getProperty("crash-reporter.crashLog.recipients");
+        int maxFileSize = Integer.valueOf(applicationProperties.getProperty("crash-reporter.crashLog.maxFileSize"));
 
         List<String> recipients = new ArrayList<String>();
 
@@ -122,10 +123,17 @@ public class WebServiceFilter extends AgaveFilter {
             LOGGER.info("Created crash log directory: {}", crashLogDirectory.getAbsolutePath());
         }
 
-        endpoints.put(CrashLogEndpoint.class,
-                new CrashLogEndpoint(pmf, sender, recipients, crashLogDirectory, gmailService, crashLogRepository));
-        endpoints.put(CrashLogController.class,
-                new CrashLogController(pmf, maxListCount, crashLogDirectory, crashLogRepository));
+        endpoints.put(CrashLogEndpoint.class, new CrashLogEndpoint(pmf,
+                                                                   sender,
+                                                                   recipients,
+                                                                   maxFileSize,
+                                                                   crashLogDirectory,
+                                                                   gmailService,
+                                                                   crashLogRepository));
+        endpoints.put(CrashLogController.class, new CrashLogController(pmf,
+                                                                       maxListCount,
+                                                                       crashLogDirectory,
+                                                                       crashLogRepository));
     }
 
     private Gson configureGson(Properties applicationProperties) {

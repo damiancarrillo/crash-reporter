@@ -15,7 +15,7 @@
   </head>
   <body>
     <div id="header" class="bck theme">
-      <h1 class="text bold"><template:useFragment name="title"/></h1>
+      <h1 class="text bold"><span class="icon leaf"></span><template:useFragment name="title"/></h1>
     </div>
     <div id="content" class="bck light">
       <template:useFragment name="content" />

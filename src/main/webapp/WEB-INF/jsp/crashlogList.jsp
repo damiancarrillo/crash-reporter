@@ -6,6 +6,18 @@
   <template:supplyFragment name="content">
     <c:choose>
       <c:when test="${fn:length(crashLogs) gt 0}">
+        <span class="text bold">
+          <c:choose>
+            <c:when test="${empty deviceId}">
+              <fmt:message key="crashLogs"/>
+            </c:when>
+            <c:otherwise>
+              <fmt:message key="crashLogsForDeviceId">
+                <fmt:param value="${deviceId}"/>
+              </fmt:message>
+            </c:otherwise>
+          </c:choose>
+        </span>
         <table>
           <tbody>
             <c:forEach var="crashLog" items="${crashLogs}" varStatus="row">
@@ -21,7 +33,7 @@
                 <td>${crashLog.createdDate}</td>
                 <td>${crashLog.appName}</td>
                 <td>${crashLog.appVersion}</td>
-                <td><a href="${contextPath}/device-id/${crashLog.deviceId}">${crashLog.deviceId}</a></td>
+                <td><a href="${contextPath}/crash-logs/device-id/${crashLog.deviceId}">${crashLog.deviceId}</a></td>
                 <td><a href="${contextPath}/crash-log/${crashLog.fileName}">${crashLog.fileName}</a></td>
               </tr>
             </c:forEach>
