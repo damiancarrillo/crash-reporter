@@ -33,8 +33,8 @@
                 <td>${crashLog.createdDate}</td>
                 <td>${crashLog.appName}</td>
                 <td>${crashLog.appVersion}</td>
-                <td><a href="${contextPath}/crash-logs/device-id/${crashLog.deviceId}">${crashLog.deviceId}</a></td>
-                <td><a href="${contextPath}/crash-log/${crashLog.fileName}">${crashLog.fileName}</a></td>
+                <td><a href="crash-logs/device-id/${crashLog.deviceId}">${crashLog.deviceId}</a></td>
+                <td><a href="crash-log/${crashLog.fileName}">${crashLog.fileName}</a></td>
               </tr>
             </c:forEach>
           </tbody>

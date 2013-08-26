@@ -8,10 +8,10 @@
       <template:useFragment name="title"/>
       - <fmt:message key="applicationName"/>
     </title>
-    <link rel="stylesheet" href="${contextPath}/style/tuktuk.css"/>
-    <link rel="stylesheet" href="${contextPath}/style/tuktuk.icons.css"/>
-    <link rel="stylesheet" href="${contextPath}/style/tuktuk.theme.css"/>
-    <link rel="stylesheet" href="${contextPath}/style/main.css"/>
+    <link rel="stylesheet" href="style/tuktuk.css"/>
+    <link rel="stylesheet" href="style/tuktuk.icons.css"/>
+    <link rel="stylesheet" href="style/tuktuk.theme.css"/>
+    <link rel="stylesheet" href="style/main.css"/>
   </head>
   <body>
     <div id="header" class="bck theme">
