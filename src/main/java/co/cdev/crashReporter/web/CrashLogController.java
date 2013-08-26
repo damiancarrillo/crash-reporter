@@ -146,6 +146,13 @@ public class CrashLogController {
         return Destinations.forward("/WEB-INF/jsp/crashLogList.jsp");
     }
 
+    @Route("/crash-logs/device-id/crash-log/${fileName}")
+    public void downloadCrashLogWithDeviceId(RoutingContext routingContext,
+                                             @Param("fileName") String fileName)
+            throws Exception {
+        downloadCrashLog(routingContext, fileName);
+    }
+
     @Route("/crash-log/${fileName}")
     public void downloadCrashLog(RoutingContext routingContext,
                                  @Param("fileName") String fileName)
