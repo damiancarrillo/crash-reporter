@@ -42,7 +42,7 @@ actual values):
           </activation>
           <properties>
             <logbackRootAppender>prod</logbackRootAppender>
-            <prettyPrintOutput>true</prettyPrintOutput>
+            <prettyPrintOutput>false</prettyPrintOutput>
             <maxListCount>200</maxListCount>
             <gmailUsername>###</gmailUsername>
             <gmailPassword>###</gmailPassword>
