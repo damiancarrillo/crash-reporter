@@ -117,6 +117,7 @@
       <groupId>org.apache.tomcat</groupId>
       <artifactId>jsp-api</artifactId>
       <version>${tomcat.servlet.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.tomcat</groupId>
