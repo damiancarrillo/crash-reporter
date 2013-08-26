@@ -71,7 +71,7 @@ public class CrashLogController {
 
     @Route("/")
     public Object welcome(RoutingContext routingContext) throws Exception {
-        return Destinations.redirect("/crash-logs", 0, maxListCount);
+        return viewCrashLogs(routingContext, 0, maxListCount);
     }
 
     @Route("/crash-logs")

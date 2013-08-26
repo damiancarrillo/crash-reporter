@@ -261,62 +261,39 @@
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>dev</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <logbackRootAppender>dev</logbackRootAppender>
-        <prettyPrintOutput>true</prettyPrintOutput>
-        <maxListCount>200</maxListCount>
-        <databaseMapping>hsql</databaseMapping>
-        <databaseDriverName>org.hsqldb.jdbcDriver</databaseDriverName>
-        <databaseConnectionURL>jdbc:hsqldb:mem:crash-reporter-dev</databaseConnectionURL>
-        <databaseUsername>sa</databaseUsername>
-        <databasePassword></databasePassword>
-      </properties>
-    </profile>
-    <profile>
-      <id>test</id>
-      <activation>
-        <property>
-          <name>env</name>
-          <value>test</value>
-        </property>
-      </activation>
-      <properties>
-        <logbackRootAppender>test</logbackRootAppender>
-        <prettyPrintOutput>true</prettyPrintOutput>
-        <maxListCount>200</maxListCount>
-        <databaseMapping>postgresql</databaseMapping>
-        <databaseDriverName>org.postgresql.Driver</databaseDriverName>
-        <databaseConnectionURL>jdbc:postgresql://localhost:5432/crash-reporter-test</databaseConnectionURL>
-        <databaseUsername>crash-reporter-test</databaseUsername>
-        <databasePassword></databasePassword>
-      </properties>
-    </profile>
-    <profile>
-      <id>prod</id>
-      <activation>
-        <property>
-          <name>env</name>
-          <value>prod</value>
-        </property>
-      </activation>
-      <properties>
-        <logbackRootAppender>production</logbackRootAppender>
-        <prettyPrintOutput>true</prettyPrintOutput>
-        <maxListCount>200</maxListCount>
-        <databaseMapping>postgresql</databaseMapping>
-        <databaseDriverName>org.postgresql.Driver</databaseDriverName>
-        <databaseConnectionURL>jdbc:postgresql://localhost:5432/crash-reporter-prod</databaseConnectionURL>
-        <databaseUsername>crash-reporter-prod</databaseUsername>
-        <databasePassword></databasePassword>
-      </properties>
-    </profile>
-  </profiles>
+  <!--
+
+  Define a profile in your ~/.m2/settings.xml file like so (replace ### with actual values):
+
+  <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                        http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <profiles>
+      <profile>
+        <id>crash-reporter-dev</id>
+        <activation>
+          <activeByDefault>true</activeByDefault>
+        </activation>
+        <properties>
+          <logbackRootAppender>dev</logbackRootAppender>
+          <prettyPrintOutput>true</prettyPrintOutput>
+          <maxListCount>200</maxListCount>
+          <gmailUsername>###</gmailUsername>
+          <gmailPassword>###</gmailPassword>
+          <crashLogSender>###</crashLogSender>
+          <crashLogRecipients>###</crashLogRecipients>
+          <crashLogDirectory>${project.build.directory}/crashLogs</crashLogDirectory>
+          <databaseMapping>hsql</databaseMapping>
+          <databaseDriverName>org.hsqldb.jdbcDriver</databaseDriverName>
+          <databaseConnectionURL>jdbc:hsqldb:mem:crash-reporter</databaseConnectionURL>
+          <databaseUsername>sa</databaseUsername>
+          <databasePassword></databasePassword>
+        </properties>
+      </profile>
+    </profiles>
+  </settings>
+  -->
   <repositories>
     <repository>
       <id>DN_M2_Repo</id>
