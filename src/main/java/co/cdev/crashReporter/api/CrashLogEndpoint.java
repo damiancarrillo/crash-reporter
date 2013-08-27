@@ -158,18 +158,13 @@ public class CrashLogEndpoint {
                 pm.close();
             }
 
-            try {
-                mailService.sendMessage(
-                    sender,
-                    recipients,
-                    String.format("Crash in %s %s", appName, appVersion),
-                    String.format("A crash has occurred in in %s version %s. The crash log is attached.\n\n", appName, appVersion),
-                    storedCrashLogFile
-                );
-            } catch (MessagingException ex) {
-                LOGGER.error("Unable to send crash report email", ex);
-                return new HTTPResponse(StatusCode._500_InternalServerError, ex);
-            }
+            mailService.sendMessage(
+                sender,
+                recipients,
+                String.format("Crash in %s %s", appName, appVersion),
+                String.format("A crash has occurred in in %s version %s. The crash log is attached.\n\n", appName, appVersion),
+                storedCrashLogFile
+            );
         } else {
             LOGGER.error("Failed to move crash log to: {}, ", storedCrashLogFile.getAbsolutePath());
         }

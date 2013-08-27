@@ -41,14 +41,18 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.File;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GMailServiceImpl implements MailService {
 
-    private final Logger logger = LoggerFactory.getLogger(GMailServiceImpl.class.getSimpleName());
+    private final Logger LOGGER = LoggerFactory.getLogger(GMailServiceImpl.class.getSimpleName());
 
     private final String username;
     private final String password;
     private final Properties properties;
+    private final ExecutorService executorService;
 
     public GMailServiceImpl(String username, String password) {
         this.username = username;
@@ -59,6 +63,8 @@ public class GMailServiceImpl implements MailService {
         properties.put("mail.smtp.starttls.enable", "true");
         properties.put("mail.smtp.host", "smtp.gmail.com");
         properties.put("mail.smtp.port", "587");
+
+        executorService = Executors.newSingleThreadExecutor();
     }
 
     @Override
@@ -68,37 +74,46 @@ public class GMailServiceImpl implements MailService {
                             final String           body,
                             final File...          attachments)
             throws MessagingException {
-        final Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(username, password);
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(username, password);
+                        }
+                    });
+
+                    final Multipart multipart = new MimeMultipart() {{
+                        addBodyPart(new MimeBodyPart() {{
+                            setText(body);
+                        }});
+                    }};
+
+                    for (final File attachment : attachments) {
+                        multipart.addBodyPart(new MimeBodyPart() {{
+                            setDataHandler(new DataHandler(new FileDataSource(attachment.getAbsolutePath())));
+                            setFileName(attachment.getName());
+                        }});
+                    }
+
+                    final MimeMessage message = new MimeMessage(session) {{
+                        setFrom(new InternetAddress(sender));
+
+                        for (String recipient : recipients) {
+                            addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
+                        }
+
+                        setSubject(subject);
+                        setContent(multipart);
+                    }};
+
+                    Transport.send(message);
+                } catch (MessagingException ex) {
+                    LOGGER.error("Unable to send email with crash log attached", ex);
+                }
             }
         });
-
-        final Multipart multipart = new MimeMultipart() {{
-            addBodyPart(new MimeBodyPart() {{
-                setText(body);
-            }});
-        }};
-
-        for (final File attachment : attachments) {
-            multipart.addBodyPart(new MimeBodyPart() {{
-                setDataHandler(new DataHandler(new FileDataSource(attachment.getAbsolutePath())));
-                setFileName(attachment.getName());
-            }});
-        }
-
-        final MimeMessage message = new MimeMessage(session) {{
-            setFrom(new InternetAddress(sender));
-
-            for (String recipient : recipients) {
-                addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
-            }
-
-            setSubject(subject);
-            setContent(multipart);
-        }};
-
-        Transport.send(message);
     }
 
 }
