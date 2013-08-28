@@ -3,7 +3,8 @@
 This is a simple crash report submission service. It sends emails with crash
 reports as attachments through Gmail. Configure the crash report service by
 defining a profile in your ~/.m2/settings.xml (see an
-[example settings.xml file](https://bitbucket.org/damiancarrillo/crash-reporter/wiki/SettingsXml)).
+[example settings.xml file](https://bitbucket.org/damiancarrillo/crash-reporter/wiki/Home#markdown-header-sample-settingsxml)).
+https://bitbucket.org/damiancarrillo/crash-reporter/wiki/SettingsXml
 
 Once you have done that, start the service with:
 
