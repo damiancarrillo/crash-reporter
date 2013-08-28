@@ -117,6 +117,26 @@ public class CrashLogEndpoint {
                                          @Param("appVersion") String     appVersion,
                                          @Param("file")       Part<File> crashLogPart)
             throws Exception {
+        if (deviceId == null) {
+            LOGGER.warn("Unable to service request - missing \"deviceId\" parameter");
+            return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"deviceId\" parameter");
+        }
+
+        if (appName == null) {
+            LOGGER.warn("Unable to service request - missing \"appName\" parameter");
+            return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"appName\" parameter");
+        }
+
+        if (appVersion == null) {
+            LOGGER.warn("Unable to service request - missing \"appVersion\" parameter");
+            return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"appVersion\" parameter");
+        }
+
+        if (crashLogPart == null) {
+            LOGGER.warn("Unable to service request - missing \"file\" parameter");
+            return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"file\" parameter");
+        }
+
         File crashLogFile = crashLogPart.getContents();
 
         LOGGER.info("POST /api/1.0/crash-logs ({} bytes, {})", crashLogFile.length(), crashLogFile.getPath());
@@ -158,11 +178,22 @@ public class CrashLogEndpoint {
                 pm.close();
             }
 
+            String deviceIdUrl = String.format("%s://%s:%s%s/crash-logs/device-id/%s",
+                    routingContext.getRequest().getScheme(),
+                    routingContext.getRequest().getServerName(),
+                    routingContext.getRequest().getServerPort(),
+                    routingContext.getRequest().getContextPath(),
+                    deviceId);
+
+            // TODO i18ize this
+
             mailService.sendMessage(
                 sender,
                 recipients,
                 String.format("Crash in %s %s", appName, appVersion),
-                String.format("A crash has occurred in in %s version %s. The crash log is attached.\n\n", appName, appVersion),
+                String.format("A crash has occurred in in %s version %s. The crash " +
+                        "log is attached.\n\nFind related crash logs at %s.\n\n",
+                        appName, appVersion, deviceIdUrl),
                 storedCrashLogFile
             );
         } else {

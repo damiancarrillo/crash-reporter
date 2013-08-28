@@ -9,9 +9,11 @@
         <span class="text bold">
           <c:choose>
             <c:when test="${empty deviceId}">
-              <fmt:message key="crashLogs"/>
+              <fmt:message key="allCrashLogs"/>
             </c:when>
             <c:otherwise>
+              <a href="../.."><fmt:message key="allCrashLogs"/></a>
+              &raquo;
               <fmt:message key="crashLogsForDeviceId">
                 <fmt:param value="${deviceId}"/>
               </fmt:message>
@@ -19,6 +21,15 @@
           </c:choose>
         </span>
         <table>
+          <thead>
+            <tr>
+              <th><fmt:message key="submissionDate"/></th>
+              <th><fmt:message key="app"/></th>
+              <th><fmt:message key="version"/></th>
+              <th><fmt:message key="deviceId"/></th>
+              <th><fmt:message key="crashLog"/></th>
+            </tr>
+          </thead>
           <tbody>
             <c:forEach var="crashLog" items="${crashLogs}" varStatus="row">
               <c:choose>
@@ -33,8 +44,15 @@
                 <td>${crashLog.createdDate}</td>
                 <td>${crashLog.appName}</td>
                 <td>${crashLog.appVersion}</td>
-                <td><a href="crash-logs/device-id/${crashLog.deviceId}">${crashLog.deviceId}</a></td>
-                <td><a href="crash-log/${crashLog.fileName}">${crashLog.fileName}</a></td>
+                <c:choose>
+                  <c:when test="${empty deviceId}">
+                    <td><a href="./crash-logs/device-id/${crashLog.deviceId}">${crashLog.deviceId}</a></td>
+                  </c:when>
+                  <c:otherwise>
+                    <td>${crashLog.deviceId}</td>
+                  </c:otherwise>
+                </c:choose>
+                <td><a href="./crash-log/${crashLog.fileName}">${crashLog.fileName}</a></td>
               </tr>
             </c:forEach>
           </tbody>
