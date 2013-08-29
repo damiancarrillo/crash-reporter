@@ -77,6 +77,10 @@ public class GMailServiceImpl implements MailService {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
+                if (sender == null || recipients == null || subject == null || body == null) {
+                    return;
+                }
+
                 try {
                     final Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
                         protected PasswordAuthentication getPasswordAuthentication() {
