@@ -33,6 +33,8 @@ public class CrashLog extends EntityImpl {
 
     String appName;
     String appVersion;
+    String deviceModel;
+    String osVersion;
     String deviceId;
     String fileName;
 
@@ -50,6 +52,22 @@ public class CrashLog extends EntityImpl {
 
     public void setAppVersion(String appVersion) {
         this.appVersion = appVersion;
+    }
+
+    public String getDeviceModel() {
+        return deviceModel;
+    }
+
+    public void setDeviceModel(String deviceModel) {
+        this.deviceModel = deviceModel;
+    }
+
+    public String getOsVersion() {
+        return osVersion;
+    }
+
+    public void setOsVersion(String osVersion) {
+        this.osVersion = osVersion;
     }
 
     public String getDeviceId() {

@@ -29,6 +29,12 @@
       <field name="appVersion">
         <column name="app_version"/>
       </field>
+      <field name="deviceModel">
+        <column name="device_model"/>
+      </field>
+      <field name="osVersion">
+        <column name="os_version"/>
+      </field>
       <field name="deviceId">
         <column name="device_id"/>
       </field>

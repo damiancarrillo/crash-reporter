@@ -26,6 +26,8 @@
               <th><fmt:message key="submissionDate"/></th>
               <th><fmt:message key="app"/></th>
               <th><fmt:message key="version"/></th>
+              <th><fmt:message key="device"/></th>
+              <th><fmt:message key="os"/></th>
               <th><fmt:message key="deviceId"/></th>
               <th><fmt:message key="crashLog"/></th>
             </tr>
@@ -41,18 +43,31 @@
                 </c:otherwise>
               </c:choose>
               <tr class="${rowStyle}">
-                <td>${crashLog.createdDate}</td>
-                <td>${crashLog.appName}</td>
-                <td>${crashLog.appVersion}</td>
+                <td><fmt:formatDate value="${crashLog.createdDate}" pattern="MMMM dd, yyyy 'at' h:mm:ss a"/></td>
+                <td><c:out value="${crashLog.appName}" escapeXml="true"/></td>
+                <td><c:out value="${crashLog.appVersion}" escapeXml="true"/></td>
+                <td><c:out value="${crashLog.deviceModel}" escapeXml="true"/></td>
+                <td><c:out value="${crashLog.osVersion}" escapeXml="true"/></td>
                 <c:choose>
                   <c:when test="${empty deviceId}">
-                    <td><a href="./crash-logs/device-id/${crashLog.deviceId}">${crashLog.deviceId}</a></td>
+                    <td>
+                      <a href="./crash-logs/device-id/${crashLog.deviceId}"><c:out value="${crashLog.deviceId}"/></a>
+                    </td>
                   </c:when>
                   <c:otherwise>
-                    <td>${crashLog.deviceId}</td>
+                    <td><c:out value="${crashLog.deviceId}"/></td>
                   </c:otherwise>
                 </c:choose>
-                <td><a href="./crash-log/${crashLog.fileName}">${crashLog.fileName}</a></td>
+                <td class="align center">
+                  <a href="./crash-log/${crashLog.fileName}" class="button tiny">
+                    <span class="icon eye-open"></span>
+                    View
+                  </a>
+                  <a href="./crash-log/download/${crashLog.fileName}" class="button secondary tiny">
+                    <span class="icon file-alt"></span>
+                    Download
+                  </a>
+                </td>
               </tr>
             </c:forEach>
           </tbody>

@@ -13,6 +13,8 @@ named `crash.log`:
 
     curl -F "appName=MyApp" \
          -F "appVersion=1.0.0" \
+         -F "deviceModel=someDeviceModel" \
+         -F "osVersion=someOSVersion" \
          -F "deviceId=someDeviceId" \
          -F "file=@crash.log;type=application/octet-stream" \
          http://localhost:9999/crash-reporter/api/crash-logs

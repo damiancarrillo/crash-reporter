@@ -83,12 +83,14 @@ public class CrashLogEndpoint {
 
     @Route(method = HTTPMethod.POST, uri = "/api/crash-logs")
     public HTTPResponse submitCrashLog(RoutingContext routingContext,
-                                       @Param("deviceId")   String     deviceId,
-                                       @Param("appName")    String     appName,
-                                       @Param("appVersion") String     appVersion,
-                                       @Param("file")       Part<File> crashLogPart)
+                                         @Param("appName")     String     appName,
+                                         @Param("appVersion")  String     appVersion,
+                                         @Param("deviceModel") String     deviceModel,
+                                         @Param("osVersion")   String     osVersion,
+                                         @Param("deviceId")    String     deviceId,
+                                         @Param("file")        Part<File> crashLogPart)
             throws Exception {
-        return this.submitCrashLog10(routingContext, deviceId, appName, appVersion, crashLogPart);
+        return this.submitCrashLog10(routingContext, appName, appVersion, deviceModel, osVersion, deviceId, crashLogPart);
     }
 
     /**
@@ -97,14 +99,18 @@ public class CrashLogEndpoint {
      * Usage:
      *     curl -F "appName=MyApp" \
      *          -F "appVersion=1.0.0" \
+     *          -F "deviceModel=someDeviceModel" \
+                -F "osVersion=someOSVersion" \
      *          -F "deviceId=someDeviceId" \
      *          -F "file=@crash.log;type=application/octet-stream" \
      *          http://localhost:9999/crash-reporter/api/crash-logs
      *
      * @param routingContext the context that this handler method executes under
-     * @param deviceId the ID of the device that is submitting the crash log (for aggregation purposes)
      * @param appName the name of the application (taken from CFBundleName, possibly)
      * @param appVersion the version of the application (taken from CFBundleShortVersion possibly)
+     * @param deviceModel the model of the device that the crash occurred on
+     * @param osVersion the version of the operating system the device was running for the submitted crash
+     * @param deviceId the ID of the device that is submitting the crash log (for aggregation purposes)
      * @param crashLogPart the part (as in <form type="multipart/form-data"></form>) that describes the crash log
      * @throws Exception if anything goes wrong
      * @return a destination object that wraps the index.jsp page
@@ -112,30 +118,19 @@ public class CrashLogEndpoint {
      */
     @Route(method = HTTPMethod.POST, uri = "/api/1.0/crash-logs")
     public HTTPResponse submitCrashLog10(RoutingContext routingContext,
-                                         @Param("deviceId")   String     deviceId,
-                                         @Param("appName")    String     appName,
-                                         @Param("appVersion") String     appVersion,
-                                         @Param("file")       Part<File> crashLogPart)
+                                         @Param("appName")     String     appName,
+                                         @Param("appVersion")  String     appVersion,
+                                         @Param("deviceModel") String     deviceModel,
+                                         @Param("osVersion")   String     osVersion,
+                                         @Param("deviceId")    String     deviceId,
+                                         @Param("file")        Part<File> crashLogPart)
             throws Exception {
-        if (deviceId == null) {
-            LOGGER.warn("Unable to service request - missing \"deviceId\" parameter");
-            return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"deviceId\" parameter");
-        }
-
-        if (appName == null) {
-            LOGGER.warn("Unable to service request - missing \"appName\" parameter");
-            return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"appName\" parameter");
-        }
-
-        if (appVersion == null) {
-            LOGGER.warn("Unable to service request - missing \"appVersion\" parameter");
-            return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"appVersion\" parameter");
-        }
-
-        if (crashLogPart == null) {
-            LOGGER.warn("Unable to service request - missing \"file\" parameter");
-            return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"file\" parameter");
-        }
+        if (deviceId == null)     return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"deviceId\" parameter");
+        if (appName == null)      return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"appName\" parameter");
+        if (appVersion == null)   return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"appVersion\" parameter");
+        if (deviceModel == null)  return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"deviceModel\" parameter");
+        if (osVersion == null)    return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"osVersion\" parameter");
+        if (crashLogPart == null) return new HTTPResponse(StatusCode._406_NotAcceptable, "Missing required \"file\" parameter");
 
         File crashLogFile = crashLogPart.getContents();
 
@@ -152,9 +147,11 @@ public class CrashLogEndpoint {
 
         if (crashLogFile.renameTo(storedCrashLogFile)) {
             CrashLog crashLog = new CrashLog();
-            crashLog.setDeviceId(deviceId);
             crashLog.setAppName(appName);
             crashLog.setAppVersion(appVersion);
+            crashLog.setDeviceModel(deviceModel);
+            crashLog.setOsVersion(osVersion);
+            crashLog.setDeviceId(deviceId);
             crashLog.setFileName(storedCrashLogFile.getName());
 
             LOGGER.info("Moved crash log to: {}", storedCrashLogFile.getAbsolutePath());

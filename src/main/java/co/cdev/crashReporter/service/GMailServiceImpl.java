@@ -74,13 +74,18 @@ public class GMailServiceImpl implements MailService {
                             final String           body,
                             final File...          attachments)
             throws MessagingException {
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+            LOGGER.warn("Not sending email -- username or password not configured");
+            return;
+        }
+
+        if (sender == null || recipients == null || subject == null || body == null) {
+            return;
+        }
+
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                if (sender == null || recipients == null || subject == null || body == null) {
-                    return;
-                }
-
                 try {
                     final Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
                         protected PasswordAuthentication getPasswordAuthentication() {

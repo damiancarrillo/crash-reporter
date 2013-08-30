@@ -147,15 +147,50 @@ public class CrashLogController {
     }
 
     @Route("/crash-logs/device-id/crash-log/${fileName}")
-    public void downloadCrashLogWithDeviceId(RoutingContext routingContext,
-                                             @Param("fileName") String fileName)
+    public void viewCrashLogWithDeviceId(RoutingContext routingContext,
+                                         @Param("fileName") String fileName)
+            throws Exception {
+        viewCrashLog(routingContext, fileName);
+    }
+
+    @Route("/crash-log/${fileName}")
+    public void viewCrashLog(RoutingContext routingContext,
+                             @Param("fileName") String fileName)
+            throws Exception {
+        File crashLog = new File(crashLogDirectory, fileName);
+
+        routingContext.getResponse().setContentType("text/plain");
+        routingContext.getResponse().setContentLength((int) crashLog.length());
+
+        FileInputStream input = new FileInputStream(crashLog);
+        FileChannel channel = input.getChannel();
+
+        byte[] buffer = new byte[256 * 1024];
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+
+        try {
+            for (int length = 0; (length = channel.read(byteBuffer)) != -1;) {
+                routingContext.getResponse().getOutputStream().write(buffer, 0, length);
+                byteBuffer.clear();
+            }
+        } finally {
+            input.close();
+        }
+
+        routingContext.getResponse().setStatus(StatusCode._200_Ok.getNumericCode());
+        routingContext.getResponse().flushBuffer();
+    }
+
+    @Route("/crash-logs/device-id/download/crash-log/${fileName}")
+    public void downloadCrashLog(RoutingContext routingContext,
+                                 @Param("fileName") String fileName)
             throws Exception {
         downloadCrashLog(routingContext, fileName);
     }
 
-    @Route("/crash-log/${fileName}")
-    public void downloadCrashLog(RoutingContext routingContext,
-                                 @Param("fileName") String fileName)
+    @Route("/crash-log/download/${fileName}")
+    public void downloadCrashLogWithDeviceId(RoutingContext routingContext,
+                                             @Param("fileName") String fileName)
             throws Exception {
         File crashLog = new File(crashLogDirectory, fileName);
 
